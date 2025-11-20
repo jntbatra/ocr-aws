@@ -11,6 +11,7 @@ All secrets and configuration values are now managed **exclusively through the `
 ## Changes Made
 
 ### 1. **Core Configuration Module** (`src/config.js`)
+
 **Status:** ✅ Updated with robust validation
 
 - Loads `dotenv` at startup (single loading point)
@@ -20,6 +21,7 @@ All secrets and configuration values are now managed **exclusively through the `
 - Exports clean configuration object for use throughout the app
 
 ### 2. **Server Entry Point** (`server.js`)
+
 **Status:** ✅ Cleaned up
 
 - ❌ Removed direct `dotenv` import and `dotenv.config()` calls
@@ -28,6 +30,7 @@ All secrets and configuration values are now managed **exclusively through the `
 - ✅ Uses `config.port` instead of `process.env.PORT || 3000`
 
 ### 3. **Authentication Handlers** (`src/handlers/auth.js`)
+
 **Status:** ✅ Refactored
 
 - ❌ Removed local variables `userPoolId` and `clientId` (which duplicated config)
@@ -42,12 +45,14 @@ All secrets and configuration values are now managed **exclusively through the `
   - Login and auth flow handlers
 
 ### 4. **Auth Middleware** (`src/middleware/auth.js`)
+
 **Status:** ✅ Simplified
 
 - ❌ Removed redundant local variables `cognitoUserPoolId` and `region`
 - ✅ Direct access to `config.region` and `config.cognitoUserPoolId` in JWKS URI construction
 
 ### 5. **Other Handlers and Utilities** (Already Compliant ✅)
+
 - `src/handlers/getUploadUrl.js` - Already using config correctly
 - `src/handlers/processReceipt.js` - Already using config correctly
 - `src/handlers/monthlySummaryTrigger.js` - Already using config correctly
@@ -55,6 +60,7 @@ All secrets and configuration values are now managed **exclusively through the `
 - `src/utils/textract.js` - Already using config correctly
 
 ### 6. **Environment Template** (`.env.example`)
+
 **Status:** ✅ Cleaned and documented
 
 - ❌ Removed placeholder values that looked like real credentials
@@ -63,6 +69,7 @@ All secrets and configuration values are now managed **exclusively through the `
 - ✅ Removed AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (not needed with IAM roles)
 
 ### 7. **Documentation** (`ENV_SETUP.md`)
+
 **Status:** ✅ Created
 
 - Comprehensive setup guide for environment variables
@@ -86,14 +93,17 @@ All secrets and configuration values are now managed **exclusively through the `
 ## Verification Results
 
 ✅ **process.env Access**
+
 - Only appears in `src/config.js` (9 occurrences - all for reading environment variables)
 - Does NOT appear in: handlers, middleware, utilities, or server.js
 
 ✅ **dotenv Imports**
+
 - Only loaded once in `src/config.js`
 - Removed from server.js and all other files
 
 ✅ **Config Module Usage**
+
 - All files import `config` from `../config.js`
 - All environment-dependent values accessed through config object
 - No inconsistencies or duplicate variable definitions
@@ -103,6 +113,7 @@ All secrets and configuration values are now managed **exclusively through the `
 ## How to Use
 
 ### Setup
+
 ```bash
 cd backend
 cp .env.example .env
@@ -111,6 +122,7 @@ npm start
 ```
 
 ### Startup Output
+
 ```
 express and cors imported
 auth middleware imported
@@ -119,6 +131,7 @@ Server successfully listening on port 3000
 ```
 
 ### In Your Code
+
 ```javascript
 import config from "../config.js";
 
@@ -132,14 +145,14 @@ const dbTable = config.tableName;
 
 ## Files Modified Summary
 
-| File | Changes |
-|------|---------|
-| `src/config.js` | Added validation, improved structure |
-| `server.js` | Removed dotenv, uses config module |
-| `src/handlers/auth.js` | Removed duplicate variables, uses config directly |
-| `src/middleware/auth.js` | Simplified, removed local variables |
-| `.env.example` | Cleaned up, better documentation |
-| `ENV_SETUP.md` | New documentation file |
+| File                     | Changes                                           |
+| ------------------------ | ------------------------------------------------- |
+| `src/config.js`          | Added validation, improved structure              |
+| `server.js`              | Removed dotenv, uses config module                |
+| `src/handlers/auth.js`   | Removed duplicate variables, uses config directly |
+| `src/middleware/auth.js` | Simplified, removed local variables               |
+| `.env.example`           | Cleaned up, better documentation                  |
+| `ENV_SETUP.md`           | New documentation file                            |
 
 ---
 
