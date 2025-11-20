@@ -1,0 +1,338 @@
+{
+  "info": {
+    "name": "Expense Tracker API - OCR Edition",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete OCR-powered Expense Tracker API. Workflow: 1) Signup → 2) Login → 3) Get Upload URL → 4) Upload Receipt to S3 → 5) Process with Textract → 6) View Expenses → 7) Get Summary"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser123\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"TempPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "signup"]
+            },
+            "description": "Register a new user. Username can be any string, email must be valid format."
+          }
+        },
+        {
+          "name": "Confirm Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser123\",\n  \"confirmationCode\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/confirm",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "confirm"]
+            },
+            "description": "Confirm user email. Check email for confirmation code."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser@example.com\",\n  \"password\": \"TempPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "    const response = pm.response.json();",
+                    "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                    "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                    "    console.log('Tokens saved to collection variables');",
+                    "}"
+                  ]
+                }
+              }
+            ],
+            "description": "Login with email and password. Returns accessToken, refreshToken, and idToken."
+          }
+        }
+      ]
+    },
+    {
+      "name": "OCR Receipt Upload",
+      "item": [
+        {
+          "name": "1. Get Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentType\": \"image/jpeg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/upload-url",
+              "host": ["{{base_url}}"],
+              "path": ["upload-url"]
+            },
+            "description": "Get a signed S3 URL to upload receipt image. Response contains uploadUrl and key."
+          }
+        },
+        {
+          "name": "2. Upload Receipt to S3",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "image/jpeg"
+              }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": "/path/to/receipt.jpg"
+              }
+            },
+            "url": {
+              "raw": "https://your-signed-url-here",
+              "protocol": "https",
+              "host": ["your-signed-url-here"]
+            },
+            "description": "Upload receipt image to S3 using the signed URL from step 1. Use the full URL from the uploadUrl response."
+          }
+        },
+        {
+          "name": "3. Process Receipt with Textract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"receipts/your-image-key-from-step-1.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/process",
+              "host": ["{{base_url}}"],
+              "path": ["process"]
+            },
+            "description": "Send receipt to AWS Textract for OCR extraction. Uses the 'key' from step 1. Returns extracted data (merchant, total, date, category) for review."
+          }
+        },
+        {
+          "name": "4. Save Extracted Expense (Optional - Modify Before Save)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receiptUrl\": \"https://expense-tracker-receipts-496157869522-ap-south-1.s3.amazonaws.com/receipts/image-key.jpg\",\n  \"merchant\": \"Starbucks\",\n  \"total\": 12.50,\n  \"date\": \"2025-11-21\",\n  \"category\": \"Food\",\n  \"rawText\": \"Latte, Croissant\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/save-expense",
+              "host": ["{{base_url}}"],
+              "path": ["save-expense"]
+            },
+            "description": "Save the expense to DynamoDB. You can modify the extracted data before saving (merchant, amount, date, category). Required fields: merchant, total, date."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Get All Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/expenses",
+              "host": ["{{base_url}}"],
+              "path": ["expenses"]
+            },
+            "description": "Retrieve all expenses for the authenticated user (includes OCR-extracted and manual entries)"
+          }
+        },
+        {
+          "name": "Create Manual Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"category\": \"Food\",\n  \"description\": \"Lunch at restaurant\",\n  \"date\": \"2025-11-21\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/expenses",
+              "host": ["{{base_url}}"],
+              "path": ["expenses"]
+            },
+            "description": "Create a new expense directly (without OCR). Requires amount and category."
+          }
+        },
+        {
+          "name": "Get Monthly Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/summary?month=2025-11",
+              "host": ["{{base_url}}"],
+              "path": ["summary"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2025-11",
+                  "description": "Month in YYYY-MM format"
+                }
+              ]
+            },
+            "description": "Get expense summary for a specific month. Shows total, count, and category breakdown."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Summary & Notifications",
+      "item": [
+        {
+          "name": "Trigger Monthly Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/trigger-summary",
+              "host": ["{{base_url}}"],
+              "path": ["trigger-summary"]
+            },
+            "description": "Trigger SNS notification with monthly expense summary for all users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check if server is running"
+          }
+        }
+      ]
+    }
+  ]
+}

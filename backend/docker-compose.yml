@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  expense-tracker-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: expense-tracker-backend
+    ports:
+      - "3001:3001"
+    environment:
+      # Node environment
+      NODE_ENV: production
+      PORT: 3001
+
+      # AWS Configuration
+      AWS_REGION: ap-south-1
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      # Cognito Configuration
+      COGNITO_USER_POOL_ID: ap-south-1_zUGYPTrrl
+      COGNITO_CLIENT_ID: 7hi1vuqmgmh4e6v45d5u9hkevt
+
+      # DynamoDB Configuration
+      TABLE_NAME: expense-tracker-stack-ExpenseTable-13LXOU425Z
+
+      # S3 Configuration
+      UPLOAD_BUCKET: expense-tracker-receipts-496157869522-ap-south-1
+
+      # SNS Configuration
+      SNS_TOPIC_ARN: arn:aws:sns:ap-south-1:496157869522:expense-tracker-summary
+
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+
+    restart: unless-stopped
+    networks:
+      - expense-tracker-network
+
+    # Health check
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3001/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  expense-tracker-network:
+    driver: bridge

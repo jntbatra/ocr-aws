@@ -1,0 +1,118 @@
+# Root level .gitignore for the entire project
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Environment variables (CRITICAL - NEVER commit these!)
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.test.local
+.env.development.local
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+coverage/
+.nyc_output/
+
+# Testing
+/coverage
+.mocha_output
+
+# AWS
+.aws/
+.sam/
+.elasticbeanstalk/
+aws-exports.js
+
+# Docker
+docker-compose.override.yml
+
+# Security & Keys (CRITICAL!)
+*.pem
+*.key
+*.pub
+private_key*
+public_key*
+secrets/
+.ssh/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+
+# VS Code
+.vscode/settings.json
+.vscode/extensions.json
+*.code-workspace
+
+# Node
+.npm
+.eslintcache
+
+# Package manager
+package-lock.json (optional - include if you want consistency)
+yarn.lock (optional - include if you want consistency)
+
+# IDE - VSCode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# macOS
+*.DS_Store
+
+# Windows
+[Dd]esktop.ini
+ehthumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Misc
+.vercel
+.turbo
+dist-ssr
+*.local
