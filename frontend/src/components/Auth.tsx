@@ -25,6 +25,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
     confirmationCode: "",
     newPassword: "",
     confirmPassword: "",
+    username: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -141,6 +142,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
         confirmationCode: "",
         newPassword: "",
         confirmPassword: "",
+        username: "",
       });
       setError(""); // Clear error
       // Show success by setting a message
@@ -275,6 +277,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                     confirmationCode: "",
                     newPassword: "",
                     confirmPassword: "",
+                    username: "",
                   });
                   setError("");
                 }}
@@ -336,6 +339,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                     confirmationCode: "",
                     newPassword: "",
                     confirmPassword: "",
+                    username: "",
                   });
                   setError("");
                 }}
@@ -446,6 +450,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                     confirmationCode: "",
                     newPassword: "",
                     confirmPassword: "",
+                    username: "",
                   });
                   setError("");
                 }}

@@ -1,7 +1,11 @@
 import { API_BASE_URL } from "./config";
 
-const getAuthHeaders = () => {
+const getAuthHeaders = (): Record<string, string> => {
+  if (typeof window === "undefined") {
+    return {}; // SSR - no localStorage available
+  }
   const token = localStorage.getItem("accessToken");
+  console.log("Auth token:", token ? "Present" : "Missing");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -115,27 +119,69 @@ export const processReceipt = async (key: string) => {
 };
 
 export const getExpenses = async () => {
-  const response = await fetch(`${API_BASE_URL}/expenses`, {
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error("Failed to fetch expenses");
-  const data = await response.json();
-  return data.expenses || [];
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    };
+    console.log("Fetching expenses with headers:", headers);
+    const response = await fetch(`${API_BASE_URL}/expenses`, {
+      method: "GET",
+      headers,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch expenses: ${response.status}`, errorText);
+      throw new Error(`Failed to fetch expenses: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.expenses || [];
+  } catch (error) {
+    console.error("getExpenses error:", error);
+    throw error;
+  }
 };
 
 export const getMonthlySummary = async (month: string) => {
-  const response = await fetch(`${API_BASE_URL}/summary?month=${month}`, {
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error("Failed to fetch summary");
-  return response.json();
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    };
+    const response = await fetch(`${API_BASE_URL}/summary?month=${month}`, {
+      method: "GET",
+      headers,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch summary: ${response.status}`, errorText);
+      throw new Error(`Failed to fetch summary: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error("getMonthlySummary error:", error);
+    throw error;
+  }
 };
 
 export const triggerSummary = async () => {
-  const response = await fetch(`${API_BASE_URL}/trigger-summary`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error("Failed to trigger summary");
-  return response.json();
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    };
+    const response = await fetch(`${API_BASE_URL}/trigger-summary`, {
+      method: "POST",
+      headers,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to trigger summary: ${response.status}`, errorText);
+      throw new Error(`Failed to trigger summary: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error("triggerSummary error:", error);
+    throw error;
+  }
 };

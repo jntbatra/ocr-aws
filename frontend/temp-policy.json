@@ -1,0 +1,11 @@
+{
+    "Version":  "2012-10-17",
+    "Statement":  [
+                      {
+                          "Effect":  "Allow",
+                          "Principal":  "*",
+                          "Resource":  "arn:aws:s3:::expense-tracker-frontend-20251121103832/*",
+                          "Action":  "s3:GetObject"
+                      }
+                  ]
+}
