@@ -20,7 +20,14 @@ const app = express();
 const PORT = config.port;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // Health check
@@ -59,7 +66,8 @@ app.post("/auth/login", async (req, res) => {
   try {
     const event = { body: JSON.stringify(req.body) };
     const result = await login(event);
-    console.log("Login result:", result);
+    console.log("Login result status:", result.statusCode);
+    console.log("Login result body preview:", result.body.substring(0, 100));
     res.status(result.statusCode).json(JSON.parse(result.body));
   } catch (error) {
     console.error("Login error:", error);
@@ -107,13 +115,19 @@ app.post("/upload-url", authenticateToken, async (req, res) => {
 
 app.get("/expenses", authenticateToken, async (req, res) => {
   try {
+    console.log("Get expenses endpoint called for user:", req.user.id);
     const userId = req.user.id;
     const { getExpensesByUser } = await import("./src/utils/dynamo.js");
     const expenses = await getExpensesByUser(userId);
-    res.status(200).json({ expenses });
+    console.log(
+      `Retrieved ${expenses ? expenses.length : 0} expenses for user ${userId}`
+    );
+    res.status(200).json({ expenses: expenses || [] });
   } catch (error) {
     console.error("Get expenses error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 });
 

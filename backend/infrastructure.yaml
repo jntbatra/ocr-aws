@@ -198,39 +198,40 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
+          set -e
+
           apt update -y
-          apt install -y curl git
+          apt install -y curl git docker.io docker-compose
 
-          # Install Node.js 20 (LTS)
-          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-          apt install -y nodejs
+          # Start Docker
+          systemctl start docker
+          systemctl enable docker
 
-          # Install PM2
-          npm install -g pm2
+          # Add ubuntu user to docker group
+          usermod -aG docker ubuntu
 
           # Clone the repository
           cd /home/ubuntu
-          git clone https://github.com/jntbatra/ocr-aws-backend.git app
+          git clone https://github.com/jntbatra/ocr-aws.git app
           cd app/backend
 
-          # Install dependencies
-          npm install
-
-          # Create environment configuration
+          # Create environment configuration from CloudFormation outputs
           cat > .env << EOF
+          AWS_REGION=ap-south-1
           TABLE_NAME=${ExpenseTable}
           UPLOAD_BUCKET=${ReceiptBucket}
-          SNS_TOPIC_ARN=${MonthlySummaryTopic}
+          SNS_TOPIC_ARN=${MonthlySummaryTopic.Arn}
           COGNITO_USER_POOL_ID=${CognitoUserPool}
           COGNITO_CLIENT_ID=${CognitoUserPoolClient}
           PORT=3000
-          JWT_SECRET=your-production-secret-key
+          JWT_SECRET=$(openssl rand -base64 32)
           EOF
 
-          # Start the application
-          pm2 start server.js --name expense-tracker
-          pm2 startup
-          pm2 save
+          # Fix ownership
+          chown -R ubuntu:ubuntu /home/ubuntu/app
+
+          # Start application with Docker Compose
+          sudo -u ubuntu docker-compose up -d
 
       Tags:
         - Key: Name

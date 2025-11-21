@@ -19,17 +19,31 @@ function getKey(header, callback) {
 
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
+  console.log(
+    "Auth middleware - checking authorization header:",
+    authHeader ? "Present" : "Missing"
+  );
+
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
+    console.log("Auth middleware - no token found in Authorization header");
     return res.status(401).json({ error: "Access token required" });
   }
 
+  console.log("Auth middleware - token found, verifying...");
   jwt.verify(token, getKey, { algorithms: ["RS256"] }, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ error: "Invalid token" });
+      console.error(
+        "Auth middleware - token verification failed:",
+        err.message
+      );
+      return res
+        .status(403)
+        .json({ error: "Invalid token", details: err.message });
     }
 
+    console.log("Auth middleware - token verified for user:", decoded.sub);
     req.user = {
       id: decoded.sub,
       email: decoded.email,
