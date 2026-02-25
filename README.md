@@ -79,12 +79,6 @@ The system is designed using a layered cloud-native architecture.
 * SNS (Notifications)
 * VPC + Security Groups (Networking)
 
-### Insert Architecture Diagram Below
-
-```markdown
-![Cloud Architecture Diagram](docs/architecture-component.png)
-```
-
 ---
 
 ### 2️⃣ Data Flow Pipeline (Sequence View)
@@ -96,12 +90,6 @@ Workflows include:
 * Expense Management
 * Monthly Summary Notifications
 
-### Insert Data Flow Diagram Below
-
-```markdown
-![Data Flow Diagram](docs/dataflow-sequence.png)
-```
-
 ---
 
 ### 3️⃣ Infrastructure Deployment (IaC View)
@@ -110,12 +98,6 @@ All AWS resources are provisioned through:
 
 ```
 infrastructure.yaml
-```
-
-### Insert Infrastructure Diagram Below
-
-```markdown
-![Infrastructure Diagram](docs/infrastructure-architecture.png)
 ```
 
 ---
@@ -160,11 +142,6 @@ infrastructure.yaml
 * JWT token issued upon login
 * JWT used for protected API calls
 
-```markdown
-![Login Page](docs/login.png)
-![Cognito Console](docs/cognito.png)
-```
-
 ---
 
 ### Receipt Upload & OCR Pipeline
@@ -181,11 +158,6 @@ infrastructure.yaml
 6. User confirms data
 7. Expense saved to DynamoDB
 
-```markdown
-![Receipt Upload](docs/upload.png)
-![Textract Response](docs/textract-response.png)
-```
-
 ---
 
 ### Expense Dashboard
@@ -199,10 +171,6 @@ infrastructure.yaml
   * Expense table
   * Summary statistics
 
-```markdown
-![Dashboard](docs/dashboard.png)
-```
-
 ---
 
 ### Monthly Email Notifications
@@ -211,10 +179,6 @@ infrastructure.yaml
 * Formatted HTML summary
 * Published to SNS topic
 * Delivered via email
-
-```markdown
-![SNS Console](docs/sns.png)
-```
 
 ---
 
