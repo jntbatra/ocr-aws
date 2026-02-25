@@ -79,7 +79,7 @@ The system is designed using a layered cloud-native architecture.
 * SNS (Notifications)
 * VPC + Security Groups (Networking)
 
-![Cloud Architecture Diagram](docs/architecture/component-architecture.png)
+![Cloud Architecture Diagram](docs/architecture/component-architecture.jpg)
 
 ---
 
